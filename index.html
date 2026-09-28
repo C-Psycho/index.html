@@ -20,14 +20,14 @@
       })('lYNOR8x5yK57WQJZ');
     </script>
 
-    <!-- Pendo Tracking Script -->
+    <!-- Pendo Base Snippet -->
     <script>
-    (function(apiKey){
-    (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];
-    v=['initialize','identify','updateOptions','pageLoad','track','trackAgent'];for(w=0,x=v.length;w<x;++w)(function(m){
-    o[m]=o[m]||function(){o._q[m===v[0]?'unshift':'push']([m].concat([].slice.call(arguments,0)));};})(v[w]);
-    y=e.createElement(n);y.async=!0;y.src='https://cdn.eu.pendo.io/agent/static/'+apiKey+'/pendo.js';
-    z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
+    (function(publicAppId){
+        (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];
+        v=['initialize','identify','updateOptions','pageLoad','track','trackAgent'];for(w=0,x=v.length;w<x;++w)(function(m){
+            o[m]=o[m]||function(){o._q[m===v[0]?'unshift':'push']([m].concat([].slice.call(arguments,0)));};})(v[w]);
+            y=e.createElement(n);y.async=!0;y.src='https://cdn.eu.pendo.io/agent/static/'+publicAppId+'/pendo.js';
+            z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
     })('04ca0f7a-319d-4e1b-9159-43ae71e4c3c7');
     </script>
 
@@ -264,24 +264,46 @@
         function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
-            showDashboard(email.split('@')[0]);
+            const username = email.split('@')[0];
+            showDashboard(username, email);
         }
 
         function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
-            showDashboard(name);
+            const email = document.getElementById('reg-email').value;
+            showDashboard(name, email);
         }
 
-        function showDashboard(username) {
+        function showDashboard(username, email) {
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('dashboard-container').style.display = 'block';
             document.getElementById('user-display-name').innerText = username;
+
+            // Initialize Pendo with user metadata upon login
+            if (window.pendo) {
+                pendo.initialize({
+                    visitor: {
+                        id: email,             // unique visitor ID (using email here)
+                        email: email,          // user email
+                        full_name: username    // display name
+                    },
+                    account: {
+                        id: 'ACCOUNT_ID_HERE', // replace with company/account ID if applicable
+                        name: 'Test Account'
+                    }
+                });
+            }
         }
 
         function handleLogout() {
             document.getElementById('dashboard-container').style.display = 'none';
             document.getElementById('auth-container').style.display = 'block';
+
+            // Teardown or reset Pendo session on logout
+            if (window.pendo && typeof pendo.teardown === 'function') {
+                pendo.teardown();
+            }
         }
     </script>
 </body>
